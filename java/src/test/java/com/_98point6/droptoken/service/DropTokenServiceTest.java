@@ -164,7 +164,7 @@ public class DropTokenServiceTest {
         assertEquals(game.getMovesList().get(0).getPlayer(), actualResponse.getPlayer());
         assertEquals(game.getMovesList().get(0).getType(), actualResponse.getType());
         assertTrue(actualResponse.getColumn().isPresent());
-        assertEquals(game.getMovesList().get(0).getColumn(), actualResponse.getColumn().get().intValue());
+        assertEquals(game.getMovesList().get(0).getColumn(), actualResponse.getColumn().get());
     }
 
     @Test

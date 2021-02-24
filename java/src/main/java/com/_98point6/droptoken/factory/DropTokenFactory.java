@@ -2,18 +2,22 @@ package com._98point6.droptoken.factory;
 
 import com._98point6.droptoken.DO.Game;
 import com._98point6.droptoken.DO.Move;
+import com._98point6.droptoken.DropTokenResource;
 import com._98point6.droptoken.model.CreateGameRequest;
 import com._98point6.droptoken.model.GameStatusResponse;
 import com._98point6.droptoken.model.PostMoveRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class DropTokenFactory {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(DropTokenFactory.class);
     /**
-     * Builder for new game
+     * Builder for a new game
      */
     public Game buildGame(CreateGameRequest request) {
         Game game = new Game();
@@ -27,6 +31,15 @@ public class DropTokenFactory {
         return game;
     }
 
+    /**
+     * Builder for a move of a particular game.
+     * If move is valid, we insert it into grid
+     * After that, we check if the move is a wining move :
+     *      Horizontally
+     *      Vertically
+     *      Diagonally
+     *      Backslash diagonally
+     */
     public Move buildMove(Game game, String playerId, PostMoveRequest request) {
 
         String[][] grid = game.getGrid();
@@ -34,9 +47,6 @@ public class DropTokenFactory {
         boolean canInsert = false;
         int rowNum = -1;
         int colNum = request.getColumn();
-
-        // Fill each cell with empty string to start with
-
 
         for (int i=0; i<rows; i++) {
             if(StringUtils.isBlank(grid[i][colNum-1])){
@@ -79,9 +89,15 @@ public class DropTokenFactory {
         return move;
     }
 
+
     private boolean contains(String gridString, String streak){
         return gridString.contains(streak);
     }
+
+    /**
+     * Checks if the move made was a wining move
+     * Uses the row num where token is inserted, checks all the columns and append the value
+     */
     private String horizontal(int rowNum, String[][] grid){
         StringBuilder sb = new StringBuilder(grid[0].length);
         for(int i=0; i<grid[0].length; i++){
@@ -89,6 +105,11 @@ public class DropTokenFactory {
         }
         return sb.toString();
     }
+
+    /**
+     * Checks if the move made was a wining move
+     * Uses the col num where token is inserted, checks all the rows and append the value
+     */
     private String vertical(int colNum, String[][] grid){
         StringBuilder sb = new StringBuilder(grid.length);
         for (String[] strings : grid) {
@@ -97,6 +118,11 @@ public class DropTokenFactory {
         return sb.toString();
     }
 
+    /**
+     * Checks if the move made was a wining move
+     * Uses the col num and row num where token is inserted,
+     * check all the diagonal(left to right) values for each row and append the value
+     */
     private String slashDiagonal(int rowNum, int colNum, String[][] grid){
         StringBuilder sb = new StringBuilder(grid.length);
         for(int i=0; i<grid.length; i++){
@@ -108,6 +134,11 @@ public class DropTokenFactory {
         return sb.toString();
     }
 
+    /**
+     * Checks if the move made was a wining move
+     * Uses the col num and row num where token is inserted,
+     * check all the back slash diagonal(right to left) values for each row and append the value
+     */
     private String backslashDiagonal(int rowNum, int colNum, String[][] grid){
         StringBuilder sb = new StringBuilder(grid.length);
         for(int i=0; i<grid.length; i++){
@@ -120,37 +151,23 @@ public class DropTokenFactory {
     }
 
 //    private void printGrid(String[][] grid) {
-//        System.out.println("Grid output");
-//        System.out.print("\t\t");
+//        StringBuilder gridOutput = new StringBuilder();
+//        gridOutput.append("Grid output\n");
+//        gridOutput.append("\t\t");
 //        for (int i=0; i<grid.length; i++) {
-//            System.out.print("Col" + i + "\t");
+//            gridOutput.append("Col").append(i).append("\t");
 //        }
-//        System.out.println();
+//        gridOutput.append("\n");
 //
 //        for(int i=0; i<grid.length; i++){
-//            System.out.print("row" + i + "\t");
+//            gridOutput.append("row").append(i).append("\t");
 //
 //            for(int j=0; j<grid[0].length; j++){
-//                System.out.print(grid[i][j] + "\t");
+//                gridOutput.append(grid[i][j]).append("\t");
 //            }
-//            System.out.println("\n");
+//            gridOutput.append("\n");
 //        }
+//        logger.info(gridOutput.toString());
 //    }
 
-    public GameStatusResponse buildGameStatusResponse(Game game) {
-        if (StringUtils.isBlank(game.getWinner())) {
-            return new GameStatusResponse.Builder()
-                    .players(game.getPlayers())
-                    .state(game.getState())
-                    .moves(game.getMovesList().size())
-                    .build();
-        } else {
-            return new GameStatusResponse.Builder()
-                    .players(game.getPlayers())
-                    .state(game.getState())
-                    .winner(game.getWinner())
-                    .moves(game.getMovesList().size())
-                    .build();
-        }
-    }
 }

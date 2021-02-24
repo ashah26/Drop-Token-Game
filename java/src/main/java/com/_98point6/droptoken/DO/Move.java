@@ -8,7 +8,7 @@ public class Move {
 
     String moveLink;
     String player;
-    int column;
+    Integer column;
     String type;
 
     public String getMoveLink() {
@@ -27,11 +27,11 @@ public class Move {
         this.player = player;
     }
 
-    public int getColumn() {
+    public Integer getColumn() {
         return column;
     }
 
-    public void setColumn(int column) {
+    public void setColumn(Integer column) {
         this.column = column;
     }
 

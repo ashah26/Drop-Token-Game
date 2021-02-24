@@ -35,6 +35,10 @@ public class DropTokenService {
         dropTokenFactory = new DropTokenFactory();
     }
 
+    /**
+     * Creates new game with columns, rows and a list of players passed in request.
+     * After creating the game, saves it to DB
+     */
     public CreateGameResponse createNewGame(CreateGameRequest request) throws BadRequestException {
         dropTokenValidator.validateCreateNewGameRequest(request);
         Game newGame = dropTokenFactory.buildGame(request);
@@ -42,6 +46,9 @@ public class DropTokenService {
         return new CreateGameResponse.Builder().gameId(newGame.getGameId()).build();
     }
 
+    /**
+     * Gets a list of all gameId which are in progress at the moment
+     */
     public GetGamesResponse getGames() {
 
         return new GetGamesResponse.Builder()
@@ -49,18 +56,27 @@ public class DropTokenService {
                 .build();
     }
 
+    /**
+     * Gets details of a particular game like number of players, total moves, state (Done or in-progress)
+     * and winner if game is over
+     */
     public  GameStatusResponse getGameStatus(String gameId) throws BadRequestException {
-        // TODO: Need to validate about winner key - it should not appear it state is in progress
         dropTokenValidator.validateGameStatus(gameId);
         Game game = dropTokenDAO.getGame(gameId);
-        return dropTokenFactory.buildGameStatusResponse(game);
+        return new GameStatusResponse.Builder()
+                .players(game.getPlayers())
+                .state(game.getState())
+                .winner(game.getWinner())
+                .moves(game.getMovesList().size())
+                .build();
+
 
     }
 
 
     /**
      * When a player wants to make a move, he/she needs to pass a column a number in the request
-     * And will validate the move and return the output
+     * And will validate the move, save the move in DB and return the move link number
      */
     public PostMoveResponse postMove(String gameId, String playerId, PostMoveRequest request) throws BadRequestException, NotFoundException {
         dropTokenValidator.validatePostMoveRequest(gameId, playerId, request);
@@ -73,7 +89,10 @@ public class DropTokenService {
                 .build();
     }
 
-
+    /**
+     * To get a detailed list which includes playerId and column of all the moves of a particular game
+     * We can also get a filtered list in a particular range by providing start and until params
+     */
     public GetMovesResponse getMoves(String gameId, Integer start, Integer until) throws BadRequestException, NotFoundException {
         dropTokenValidator.validateMovesRequest(gameId, start, until);
         List<GetMoveResponse> movesList = new ArrayList<>();
@@ -93,8 +112,10 @@ public class DropTokenService {
                 .build();
     }
 
+    /**
+     *  To get details of a particular move in a particular game
+     */
     public GetMoveResponse getMove(String gameId, Integer moveId) throws BadRequestException, NotFoundException {
-        // TODO: if type is quit no column should appear
         dropTokenValidator.validateMoveRequest(gameId, moveId);
         Game game = dropTokenDAO.getGame(gameId);
         dropTokenValidator.validateMoveId(game, moveId);
