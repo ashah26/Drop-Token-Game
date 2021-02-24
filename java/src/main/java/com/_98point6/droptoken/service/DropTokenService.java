@@ -97,14 +97,14 @@ public class DropTokenService {
         dropTokenValidator.validateMovesRequest(gameId, start, until);
         List<GetMoveResponse> movesList = new ArrayList<>();
         Game game = dropTokenDAO.getGame(gameId);
-        start = Optional.ofNullable(start).orElse(1);
-        until = Optional.ofNullable(until).orElse(game.getMovesList().size());
-        dropTokenValidator.validateMoveQueryParam(game, start, until);
-
-
-        // MoveLink 1 represents index 0 in MoveList
-        for(int i=start; i <= until; i++){
-            movesList.add(getMove(gameId, i));
+        if(game.getMovesList().size() > 0){
+            start = Optional.ofNullable(start).orElse(1);
+            until = Optional.ofNullable(until).orElse(game.getMovesList().size());
+            dropTokenValidator.validateMoveQueryParam(game, start, until);
+            // MoveLink 1 represents index 0 in MoveList
+            for(int i=start; i <= until; i++){
+                movesList.add(getMove(gameId, i));
+            }
         }
 
         return new GetMovesResponse.Builder()
